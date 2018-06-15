@@ -29,6 +29,11 @@ KernelBase::KernelBase(KernelID kid, const RunParams& params)
     default_size(0),
     default_reps(0),
     running_variant(NumVariants)
+#ifdef RAJA_PERFSUITE_USE_CALIPER
+  ,
+    kernel_ann("rajaperf.kernel",   CALI_ATTR_DEFAULT | CALI_ATTR_NESTED),
+    variant_ann("rajaperf.variant", CALI_ATTR_SKIP_EVENTS)
+#endif
 {
   for (size_t ivar = 0; ivar < NumVariants; ++ivar) {
      num_exec[ivar] = 0;
@@ -65,6 +70,13 @@ void KernelBase::execute(VariantID vid)
   running_variant = vid;
 
   resetTimer();
+
+#ifdef RAJA_PERFSUITE_USE_CALIPER
+  cali::Annotation::Guard
+    g_v(variant_ann.begin(getVariantName(vid).c_str()));
+  cali::Annotation::Guard
+    g_k(kernel_ann.begin(name.c_str()));
+#endif
 
   resetDataInitCount();
   this->setUp(vid);

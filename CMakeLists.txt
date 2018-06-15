@@ -27,6 +27,8 @@ endif()
 
 set(ENABLE_TESTS On CACHE BOOL "")
 
+option(ENABLE_CALIPER "Enable Caliper support" FALSE)
+
 include(blt/SetupBLT.cmake)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -56,7 +58,6 @@ add_subdirectory(tpl/RAJA)
 get_property(RAJA_INCLUDE_DIRS DIRECTORY tpl/RAJA PROPERTY INCLUDE_DIRECTORIES)
 include_directories(${RAJA_INCLUDE_DIRS})
 
-
 #
 # Setup variables to pass to Perf suite
 #
@@ -72,6 +73,17 @@ endif()
 if (ENABLE_CUDA)
   list(APPEND RAJA_PERFSUITE_DEPENDS cuda)
 endif() 
+if (ENABLE_CALIPER)
+  find_package(caliper)
+  if (caliper_FOUND)
+    set(RAJA_PERFSUITE_USE_CALIPER TRUE)
+    blt_register_library(NAME caliper
+      INCLUDES ${caliper_INCLUDE_DIR}
+      COMPILE_FLAGS "-DRAJA_PERFSUITE_USE_CALIPER"
+      LIBRARIES caliper)
+    list(APPEND RAJA_PERFSUITE_DEPENDS caliper)    
+  endif()
+endif()
 
 set(RAJAPERF_BUILD_SYSTYPE $ENV{SYS_TYPE})
 set(RAJAPERF_BUILD_HOST $ENV{HOSTNAME})

@@ -27,6 +27,10 @@
 #include <string>
 #include <iostream>
 
+#ifdef RAJA_PERFSUITE_USE_CALIPER
+#include <caliper/cali.h>
+#endif
+
 namespace rajaperf {
 
 /*!
@@ -129,7 +133,12 @@ private:
   Index_type default_size;
   Index_type default_reps;
 
-  VariantID running_variant; 
+  VariantID running_variant;
+
+#ifdef RAJA_PERFSUITE_USE_CALIPER
+  cali::Annotation kernel_ann;
+  cali::Annotation variant_ann;
+#endif
 };
 
 }  // closing brace for rajaperf namespace
